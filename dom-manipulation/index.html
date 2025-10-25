@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dynamic Quote Generator</title>
-  </head>
-  <body>
-    <h1>Dynamic Quote Generator</h1>
-    
-    <div id="quoteDisplay"></div>
-    <button id="newQuote">Show New Quote</button>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dynamic Quote Generator</title>
+</head>
+<body>
+  <h1>Dynamic Quote Generator</h1>
 
-    <div>
-      <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-      <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-      <button onclick="addQuote()">Add Quote</button>
-    </div>
+  <!-- Display area -->
+  <div id="quoteDisplay" aria-live="polite" style="margin:16px 0; font-weight:600;"></div>
 
-    <script src="script.js"></script>
-  </body>
+  <!-- Controls -->
+  <button id="newQuote">Show New Quote</button>
+
+  <div style="margin-top:12px;">
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+    <button id="addQuoteBtn">Add Quote</button>
+  </div>
+
+  <!-- Storage / JSON controls -->
+  <div style="margin-top:12px;">
+    <button id="exportBtn">Export Quotes (JSON)</button>
+    <input type="file" id="importFile" accept=".json" />
+  </div>
+
+  <script src="script.js"></script>
+</body>
 </html>
