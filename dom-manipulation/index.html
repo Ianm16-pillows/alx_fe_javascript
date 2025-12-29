@@ -8,20 +8,23 @@
 <body>
     <h1>Dynamic Quote Generator</h1>
 
+    <!-- Filter by Category -->
+    <label for="categoryFilter">Filter by Category:</label>
+    <select id="categoryFilter">
+        <option value="all">All</option>
+    </select>
+
     <!-- Quote Display -->
     <div id="quoteDisplay">Your quote will appear here...</div>
 
     <!-- Show Random Quote -->
     <button id="newQuote">Show New Quote</button>
 
-    <!-- Add New Quote Form -->
-    <div id="addQuoteForm">
-        <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-        <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-        <button id="addQuoteBtn">Add Quote</button>
-    </div>
+    <!-- Add Quote Form Container -->
+    <div id="addQuoteForm"></div>
 
     <script src="script.js"></script>
 </body>
 </html>
+
 
