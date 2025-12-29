@@ -1,72 +1,56 @@
-// script.js
-
-// Initialize quotes array (pull from localStorage if available)
-let quotes = JSON.parse(localStorage.getItem('quotes')) || [
-  { text: "Discipline equals freedom.", category: "Motivation" },
-  { text: "Stay hungry, stay foolish.", category: "Inspiration" },
-  { text: "Code is like humor. When you have to explain it, it’s bad.", category: "Programming" },
-  { text: "Push yourself because no one else is going to do it for you.", category: "Motivation" }
+// Initial quote array
+let quotes = [
+    { text: "The best way to predict the future is to invent it.", category: "Motivation" },
+    { text: "Code is like humor. When you have to explain it, it’s bad.", category: "Humor" },
+    { text: "Simplicity is the soul of efficiency.", category: "Wisdom" }
 ];
 
+// Load quotes from localStorage if available
+if (localStorage.getItem('quotes')) {
+    quotes = JSON.parse(localStorage.getItem('quotes'));
+}
+
 // DOM Elements
-const quoteContainer = document.getElementById("quoteContainer");
-const categoryFilter = document.getElementById("categoryFilter");
+const quoteDisplay = document.getElementById('quoteDisplay');
+const newQuoteBtn = document.getElementById('newQuote');
+const addQuoteBtn = document.getElementById('addQuoteBtn');
+const newQuoteText = document.getElementById('newQuoteText');
+const newQuoteCategory = document.getElementById('newQuoteCategory');
 
-// --- Step 1: Populate categories dynamically ---
-function populateCategories() {
-  const categories = ["all", ...new Set(quotes.map(q => q.category))];
-  categoryFilter.innerHTML = categories.map(cat => 
-    `<option value="${cat}">${cat}</option>`
-  ).join("");
-
-  // Restore last selected category
-  const lastFilter = localStorage.getItem("selectedCategory") || "all";
-  categoryFilter.value = lastFilter;
-  filterQuotes();
+// Show random quote
+function showRandomQuote() {
+    if (quotes.length === 0) {
+        quoteDisplay.textContent = "No quotes available. Add one!";
+        return;
+    }
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    const quote = quotes[randomIndex];
+    quoteDisplay.textContent = `"${quote.text}" — ${quote.category}`;
 }
 
-// --- Step 2: Filter quotes based on selected category ---
-function filterQuotes() {
-  const selected = categoryFilter.value;
-  localStorage.setItem("selectedCategory", selected);
-
-  const filteredQuotes = selected === "all"
-    ? quotes
-    : quotes.filter(q => q.category === selected);
-
-  displayQuotes(filteredQuotes);
-}
-
-// --- Step 3: Display quotes ---
-function displayQuotes(quotesToDisplay) {
-  quoteContainer.innerHTML = quotesToDisplay.map(q =>
-    `<div class="quote"><p>"${q.text}"</p><small>${q.category}</small></div>`
-  ).join("");
-}
-
-// --- Step 4: Add new quote + update categories in real time ---
+// Add new quote
 function addQuote() {
-  const text = document.getElementById("quoteText").value.trim();
-  const category = document.getElementById("quoteCategory").value.trim();
-
-  if (!text || !category) return alert("Please fill in both fields.");
-
-  const newQuote = { text, category };
-  quotes.push(newQuote);
-
-  // Save to localStorage
-  localStorage.setItem("quotes", JSON.stringify(quotes));
-
-  // Update UI and categories dynamically
-  populateCategories();
-  filterQuotes();
-
-  // Clear input fields
-  document.getElementById("quoteText").value = "";
-  document.getElementById("quoteCategory").value = "";
+    const text = newQuoteText.value.trim();
+    const category = newQuoteCategory.value.trim();
+    if (text && category) {
+        const newQuote = { text, category };
+        quotes.push(newQuote);
+        // Save to localStorage
+        localStorage.setItem('quotes', JSON.stringify(quotes));
+        // Update display
+        showRandomQuote();
+        // Clear inputs
+        newQuoteText.value = '';
+        newQuoteCategory.value = '';
+    } else {
+        alert("Both quote text and category are required!");
+    }
 }
 
-// --- On Page Load ---
-document.addEventListener("DOMContentLoaded", () => {
-  populateCategories();
-});
+// Event listeners
+newQuoteBtn.addEventListener('click', showRandomQuote);
+addQuoteBtn.addEventListener('click', addQuote);
+
+// Show a quote on load
+showRandomQuote();
+
