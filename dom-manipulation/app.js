@@ -11,18 +11,14 @@ let lastSelectedCategory = localStorage.getItem("selectedCategory") || "all";
 document.addEventListener("DOMContentLoaded", () => {
   populateCategories();
   document.getElementById("categoryFilter").value = lastSelectedCategory;
-  filterQuotes();
+  displayRandomQuote();
 });
 
 // Populate unique categories dynamically
 function populateCategories() {
   const select = document.getElementById("categoryFilter");
-  // Get unique categories
   const categories = [...new Set(quotes.map(q => q.category))];
-  
-  // Remove old options except "All"
   select.querySelectorAll("option:not([value='all'])").forEach(opt => opt.remove());
-  
   categories.forEach(cat => {
     const option = document.createElement("option");
     option.value = cat;
@@ -31,11 +27,11 @@ function populateCategories() {
   });
 }
 
-// Display filtered quotes
-function filterQuotes() {
+// Display a random quote based on selected category
+function displayRandomQuote() {
   const selected = document.getElementById("categoryFilter").value;
   localStorage.setItem("selectedCategory", selected);
-  
+
   const container = document.getElementById("quoteContainer");
   container.innerHTML = "";
 
@@ -44,13 +40,20 @@ function filterQuotes() {
   if (filtered.length === 0) {
     container.innerHTML = "<p>No quotes found in this category.</p>";
   } else {
-    filtered.forEach(q => {
-      const div = document.createElement("div");
-      div.className = "quote";
-      div.innerHTML = `<strong>${q.text}</strong><br>— ${q.author} <em>(${q.category})</em>`;
-      container.appendChild(div);
-    });
+    // Pick a random quote
+    const randomIndex = Math.floor(Math.random() * filtered.length); // ✅ Math.random used here
+    const q = filtered[randomIndex];
+
+    const div = document.createElement("div");
+    div.className = "quote";
+    div.innerHTML = `<strong>${q.text}</strong><br>— ${q.author} <em>(${q.category})</em>`;
+    container.appendChild(div);
   }
+}
+
+// Filter quotes (called when dropdown changes)
+function filterQuotes() {
+  displayRandomQuote();
 }
 
 // Add a new quote
@@ -73,5 +76,5 @@ function addQuote() {
   document.getElementById("quoteCategory").value = "";
 
   populateCategories();
-  filterQuotes();
+  displayRandomQuote();
 }
