@@ -1,5 +1,5 @@
 /* =====================================================
-   Local Quotes
+   Local Data
 ===================================================== */
 let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   { id: 1, text: "Code is poetry.", author: "Anonymous", category: "Programming" },
@@ -10,7 +10,7 @@ const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
 const SYNC_INTERVAL = 10000;
 
 /* =====================================================
-   UI References
+   UI Elements
 ===================================================== */
 const quoteDisplay = document.getElementById("quoteDisplay");
 const categoryFilter = document.getElementById("categoryFilter");
@@ -23,16 +23,16 @@ function populateCategories() {
   const categories = [...new Set(quotes.map(q => q.category))];
   categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
 
-  categories.forEach(category => {
+  categories.forEach(cat => {
     const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
+    option.value = cat;
+    option.textContent = cat;
     categoryFilter.appendChild(option);
   });
 }
 
 /* =====================================================
-   Filter Quote (REQUIRED)
+   Filter Quote
 ===================================================== */
 function filterQuote() {
   const selectedCategory = categoryFilter.value;
@@ -40,18 +40,18 @@ function filterQuote() {
 
   quoteDisplay.innerHTML = "";
 
-  const filteredQuotes =
+  const filtered =
     selectedCategory === "all"
       ? quotes
       : quotes.filter(q => q.category === selectedCategory);
 
-  if (filteredQuotes.length === 0) {
+  if (filtered.length === 0) {
     quoteDisplay.innerHTML = "<p>No quotes found.</p>";
     return;
   }
 
-  const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
-  const quote = filteredQuotes[randomIndex];
+  const randomIndex = Math.floor(Math.random() * filtered.length);
+  const quote = filtered[randomIndex];
 
   quoteDisplay.innerHTML = `
     <p>"${quote.text}"</p>
@@ -63,54 +63,63 @@ function filterQuote() {
    REQUIRED: fetchQuotesFromServer
 ===================================================== */
 async function fetchQuotesFromServer() {
+  const response = await fetch(SERVER_URL);
+  const data = await response.json();
+
+  const serverQuotes = data.slice(0, 3).map(post => ({
+    id: post.id,
+    text: post.title,
+    author: "Server",
+    category: "Server"
+  }));
+
+  resolveConflicts(serverQuotes);
+}
+
+/* =====================================================
+   REQUIRED: syncQuotes (POST + headers)
+===================================================== */
+async function syncQuotes() {
   try {
-    const response = await fetch(SERVER_URL);
-    const data = await response.json();
+    await fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "application/json": "true"
+      },
+      body: JSON.stringify(quotes)
+    });
 
-    const serverQuotes = data.slice(0, 3).map(post => ({
-      id: post.id,
-      text: post.title,
-      author: "Server",
-      category: "Server"
-    }));
-
-    resolveConflicts(serverQuotes);
+    showNotification("Quotes synced to server.");
   } catch (error) {
-    console.error("Failed to fetch server quotes", error);
+    console.error("Sync failed", error);
   }
 }
 
 /* =====================================================
-   Conflict Resolution (SERVER WINS)
+   Conflict Resolution (Server Wins)
 ===================================================== */
 function resolveConflicts(serverQuotes) {
-  let conflictResolved = false;
+  let updated = false;
 
   serverQuotes.forEach(serverQuote => {
     const index = quotes.findIndex(q => q.id === serverQuote.id);
 
     if (index === -1) {
       quotes.push(serverQuote);
-      conflictResolved = true;
+      updated = true;
     } else {
-      quotes[index] = serverQuote; // server wins
-      conflictResolved = true;
+      quotes[index] = serverQuote;
+      updated = true;
     }
   });
 
-  if (conflictResolved) {
+  if (updated) {
     localStorage.setItem("quotes", JSON.stringify(quotes));
-    showNotification("Data synced from server. Conflicts resolved.");
     populateCategories();
     filterQuote();
+    showNotification("Server data applied. Conflicts resolved.");
   }
-}
-
-/* =====================================================
-   Manual Conflict Resolution
-===================================================== */
-function manualResolve() {
-  fetchQuotesFromServer();
 }
 
 /* =====================================================
@@ -130,7 +139,10 @@ function showNotification(message) {
 /* =====================================================
    Periodic Sync
 ===================================================== */
-setInterval(fetchQuotesFromServer, SYNC_INTERVAL);
+setInterval(() => {
+  fetchQuotesFromServer();
+  syncQuotes();
+}, SYNC_INTERVAL);
 
 /* =====================================================
    Init
