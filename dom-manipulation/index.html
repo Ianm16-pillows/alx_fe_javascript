@@ -1,35 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Quote Generator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Quote Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
+    #quoteContainer { margin-top: 1rem; }
+    .quote { background: #fff; padding: 1rem; margin-bottom: 0.5rem; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  </style>
 </head>
 <body>
-    <h1>Dynamic Quote Generator</h1>
 
-    <!-- Filter by Category -->
-    <label for="categoryFilter">Filter by Category:</label>
-    <select id="categoryFilter">
-        <option value="all">All</option>
-    </select>
+  <h1>Dynamic Quote Generator</h1>
 
-    <!-- Quote Display -->
-    <div id="quoteDisplay">Your quote will appear here...</div>
+  <label for="categoryFilter">Filter by Category:</label>
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+  </select>
 
-    <!-- Show Random Quote -->
-    <button id="newQuote">Show New Quote</button>
+  <div id="quoteContainer"></div>
 
-    <!-- Add Quote Form Container -->
-    <div id="addQuoteForm"></div>
+  <h2>Add a Quote</h2>
+  <input type="text" id="quoteText" placeholder="Quote" />
+  <input type="text" id="quoteAuthor" placeholder="Author" />
+  <input type="text" id="quoteCategory" placeholder="Category" />
+  <button onclick="addQuote()">Add Quote</button>
 
-    <!-- JSON Import/Export -->
-    <div id="jsonActions">
-        <button id="exportJsonBtn">Export Quotes to JSON</button>
-        <input type="file" id="importFile" accept=".json" />
-    </div>
-
-    <script src="script.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
-
