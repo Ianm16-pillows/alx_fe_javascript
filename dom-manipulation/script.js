@@ -1,5 +1,5 @@
 /* =====================================================
-   Local Quotes (Source of Truth until Server Says No)
+   Local Quotes
 ===================================================== */
 let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   { id: 1, text: "Code is poetry.", author: "Anonymous", category: "Programming" },
@@ -7,10 +7,10 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
 ];
 
 const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
-const SYNC_INTERVAL = 10000; // 10 seconds
+const SYNC_INTERVAL = 10000;
 
 /* =====================================================
-   UI Elements
+   UI References
 ===================================================== */
 const quoteDisplay = document.getElementById("quoteDisplay");
 const categoryFilter = document.getElementById("categoryFilter");
@@ -23,10 +23,10 @@ function populateCategories() {
   const categories = [...new Set(quotes.map(q => q.category))];
   categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
 
-  categories.forEach(cat => {
+  categories.forEach(category => {
     const option = document.createElement("option");
-    option.value = cat;
-    option.textContent = cat;
+    option.value = category;
+    option.textContent = category;
     categoryFilter.appendChild(option);
   });
 }
@@ -40,18 +40,18 @@ function filterQuote() {
 
   quoteDisplay.innerHTML = "";
 
-  const filtered =
+  const filteredQuotes =
     selectedCategory === "all"
       ? quotes
       : quotes.filter(q => q.category === selectedCategory);
 
-  if (filtered.length === 0) {
+  if (filteredQuotes.length === 0) {
     quoteDisplay.innerHTML = "<p>No quotes found.</p>";
     return;
   }
 
-  const randomIndex = Math.floor(Math.random() * filtered.length);
-  const quote = filtered[randomIndex];
+  const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+  const quote = filteredQuotes[randomIndex];
 
   quoteDisplay.innerHTML = `
     <p>"${quote.text}"</p>
@@ -60,15 +60,14 @@ function filterQuote() {
 }
 
 /* =====================================================
-   SERVER SYNC (Simulation)
+   REQUIRED: fetchQuotesFromServer
 ===================================================== */
-async function fetchServerQuotes() {
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
-    const serverData = await response.json();
+    const data = await response.json();
 
-    // Simulate server quotes
-    const serverQuotes = serverData.slice(0, 3).map(post => ({
+    const serverQuotes = data.slice(0, 3).map(post => ({
       id: post.id,
       text: post.title,
       author: "Server",
@@ -77,32 +76,31 @@ async function fetchServerQuotes() {
 
     resolveConflicts(serverQuotes);
   } catch (error) {
-    console.error("Server sync failed:", error);
+    console.error("Failed to fetch server quotes", error);
   }
 }
 
 /* =====================================================
-   CONFLICT RESOLUTION (SERVER WINS)
+   Conflict Resolution (SERVER WINS)
 ===================================================== */
 function resolveConflicts(serverQuotes) {
-  let conflictDetected = false;
+  let conflictResolved = false;
 
   serverQuotes.forEach(serverQuote => {
-    const localIndex = quotes.findIndex(q => q.id === serverQuote.id);
+    const index = quotes.findIndex(q => q.id === serverQuote.id);
 
-    if (localIndex === -1) {
+    if (index === -1) {
       quotes.push(serverQuote);
-      conflictDetected = true;
+      conflictResolved = true;
     } else {
-      // SERVER TAKES PRECEDENCE
-      quotes[localIndex] = serverQuote;
-      conflictDetected = true;
+      quotes[index] = serverQuote; // server wins
+      conflictResolved = true;
     }
   });
 
-  if (conflictDetected) {
+  if (conflictResolved) {
     localStorage.setItem("quotes", JSON.stringify(quotes));
-    showNotification("Quotes synced with server. Conflicts resolved.");
+    showNotification("Data synced from server. Conflicts resolved.");
     populateCategories();
     filterQuote();
   }
@@ -112,7 +110,7 @@ function resolveConflicts(serverQuotes) {
    Manual Conflict Resolution
 ===================================================== */
 function manualResolve() {
-  fetchServerQuotes();
+  fetchQuotesFromServer();
 }
 
 /* =====================================================
@@ -132,14 +130,13 @@ function showNotification(message) {
 /* =====================================================
    Periodic Sync
 ===================================================== */
-setInterval(fetchServerQuotes, SYNC_INTERVAL);
+setInterval(fetchQuotesFromServer, SYNC_INTERVAL);
 
 /* =====================================================
-   Init on Load
+   Init
 ===================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   populateCategories();
-  categoryFilter.value =
-    localStorage.getItem("selectedCategory") || "all";
+  categoryFilter.value = localStorage.getItem("selectedCategory") || "all";
   filterQuote();
 });
